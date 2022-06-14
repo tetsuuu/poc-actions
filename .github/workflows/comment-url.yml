@@ -1,7 +1,10 @@
 name: ClamAV scan
 
 on:
-  push:
+  pull_request:
+    types:
+      - opened
+      - synchronize
     branches:
       - develop
 
@@ -15,5 +18,15 @@ jobs:
       - name: GitHub ClamAV Scan
         id: scan
         uses: djdefi/gitavscan@main
+
+      - name: Comment result
+        if: steps.scan.outcome == 'failure'
+        uses: actions/github-script@v4
         with:
-          full: '--full'
+          script: |
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `Virus Scan ${{ steps.scan.outcome }}`
+            })
