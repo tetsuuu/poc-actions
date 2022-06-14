@@ -1,21 +1,19 @@
-name: Comment URL
+name: ClamAV scan
 
 on:
-  pull_request:
-    types: [opened]
-env:
-  BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
+  push:
+    branches:
+      - develop
 
 jobs:
-  comment:
+  ClamAV_Scan:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/github-script@v4
+      - uses: actions/checkout@v2
+
+      - name: GitHub ClamAV Scan
+        id: scan
+        uses: djdefi/gitavscan@main
         with:
-          script: |
-            github.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `でも: http://${{ env.BUCKET_NAME }}.s3-website-ap-northeast-1.amazonaws.com`
-            })
+          full: '--full'
